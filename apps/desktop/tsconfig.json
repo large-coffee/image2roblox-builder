@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "jsx": "react-jsx",
+    "types": ["node", "vite/client", "electron"]
+  },
+  "include": ["src", "electron.vite.config.ts", "tailwind.config.cjs", "postcss.config.cjs"]
+}

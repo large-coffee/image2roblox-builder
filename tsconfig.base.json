@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "sourceMap": true,
+    "baseUrl": ".",
+    "paths": {
+      "@image2roblox/schemas": ["packages/schemas/src"],
+      "@image2roblox/shared": ["packages/shared/src"],
+      "@image2roblox/agent-core": ["packages/agent-core/src"],
+      "@image2roblox/roblox-generator": ["packages/roblox-generator/src"],
+      "@image2roblox/ui": ["packages/ui/src"],
+      "@shared/*": ["apps/desktop/src/shared/*"],
+      "@renderer/*": ["apps/desktop/src/renderer/src/*"]
+    }
+  }
+}

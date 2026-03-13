@@ -1,0 +1,19 @@
+{
+  "name": "Image2Roblox Builder Plugin",
+  "version": "0.2.0",
+  "dockWidgetId": "Image2RobloxBuilderDock",
+  "commands": [
+    {
+      "id": "refresh-project-metadata",
+      "status": "implemented"
+    },
+    {
+      "id": "reimport-generated-content",
+      "status": "stub"
+    },
+    {
+      "id": "rebuild-selected-systems",
+      "status": "stub"
+    }
+  ]
+}

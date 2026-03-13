@@ -1,0 +1,21 @@
+{
+  "name": "image2roblox-builder",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.6.5",
+  "scripts": {
+    "dev": "turbo run dev --parallel",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "lint": "turbo run lint",
+    "check:repo": "node scripts/repo-safety-check.mjs",
+    "package:win": "turbo run package:win --filter=@image2roblox/desktop"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "turbo": "^2.5.4",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}
