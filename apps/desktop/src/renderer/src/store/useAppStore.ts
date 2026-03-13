@@ -53,6 +53,16 @@ function toErrorMessage(error: unknown): string {
   return String(error);
 }
 
+function getDesktopApi() {
+  if (!window.image2roblox) {
+    throw new Error(
+      "Desktop bridge unavailable (window.image2roblox is undefined). Restart the app or install the latest build."
+    );
+  }
+
+  return window.image2roblox;
+}
+
 const actionLabels: Record<GenerationAction, string> = {
   analyzeImage: "Analyze Image",
   generateWorld: "Generate World",
@@ -84,7 +94,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   initialize: async () => {
     try {
       set({ busy: true, busyLabel: "Loading workspace...", error: null });
-      const [projects, settings] = await Promise.all([window.image2roblox.listProjects(), window.image2roblox.getSettings()]);
+      const [projects, settings] = await Promise.all([getDesktopApi().listProjects(), getDesktopApi().getSettings()]);
       set({ projects, settings, busy: false, busyLabel: "" });
       await get().validateExecutables();
       if (projects.length > 0) {
@@ -96,14 +106,14 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   refreshProjects: async () => {
-    const projects = await window.image2roblox.listProjects();
+    const projects = await getDesktopApi().listProjects();
     set({ projects });
   },
 
   selectProject: async (projectId) => {
     try {
       set({ busy: true, busyLabel: "Loading project...", error: null, screen: "workspace" });
-      const project = await window.image2roblox.getProject(projectId);
+      const project = await getDesktopApi().getProject(projectId);
       set({ selectedProject: project, busy: false, busyLabel: "" });
     } catch (error) {
       set({ busy: false, busyLabel: "", error: toErrorMessage(error) });
@@ -113,7 +123,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   createProject: async (name) => {
     try {
       set({ busy: true, busyLabel: "Creating project...", error: null });
-      const project = await window.image2roblox.createProject(name);
+      const project = await getDesktopApi().createProject(name);
       await get().refreshProjects();
       set({ selectedProject: project, screen: "workspace", busy: false, busyLabel: "" });
     } catch (error) {
@@ -124,7 +134,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   deleteProject: async (projectId) => {
     try {
       set({ busy: true, busyLabel: "Deleting project...", error: null });
-      await window.image2roblox.deleteProject(projectId);
+      await getDesktopApi().deleteProject(projectId);
       await get().refreshProjects();
       const selected = get().selectedProject;
       if (selected?.projectId === projectId) {
@@ -137,7 +147,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   pickAndUploadImage: async () => {
-    const filePath = await window.image2roblox.pickImageFile();
+    const filePath = await getDesktopApi().pickImageFile();
     if (!filePath) return;
     await get().uploadImageFromPath(filePath);
   },
@@ -148,7 +158,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
     try {
       set({ busy: true, busyLabel: "Uploading image...", error: null, warnings: [] });
-      const updated = await window.image2roblox.uploadImage(selected.projectId, imagePath);
+      const updated = await getDesktopApi().uploadImage(selected.projectId, imagePath);
       await get().refreshProjects();
       set({ selectedProject: updated, busy: false, busyLabel: "" });
     } catch (error) {
@@ -162,7 +172,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
     try {
       set({ busy: true, busyLabel: `${actionLabels[action]}...`, error: null, warnings: [] });
-      const result = (await window.image2roblox[action](selected.projectId)) as GenerationActionResult;
+      const result = (await getDesktopApi()[action](selected.projectId)) as GenerationActionResult;
       await get().refreshProjects();
       set({ selectedProject: result.project, busy: false, busyLabel: "", warnings: result.warnings });
     } catch (error) {
@@ -173,19 +183,19 @@ export const useAppStore = create<AppState>((set, get) => ({
   openOutputFolder: async () => {
     const selected = get().selectedProject;
     if (!selected) return;
-    await window.image2roblox.openOutputFolder(selected.projectId);
+    await getDesktopApi().openOutputFolder(selected.projectId);
   },
 
   revealArtifact: async (relativePath) => {
     const selected = get().selectedProject;
     if (!selected) return;
-    await window.image2roblox.revealArtifact(selected.projectId, relativePath);
+    await getDesktopApi().revealArtifact(selected.projectId, relativePath);
   },
 
   saveSettings: async (settings) => {
     try {
       set({ busy: true, busyLabel: "Saving settings...", error: null });
-      const saved = await window.image2roblox.updateSettings(settings);
+      const saved = await getDesktopApi().updateSettings(settings);
       set({ settings: saved, busy: false, busyLabel: "" });
       await get().validateExecutables(saved);
     } catch (error) {
@@ -194,15 +204,16 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   pickExecutablePath: async () => {
-    return window.image2roblox.pickExecutableFile();
+    return getDesktopApi().pickExecutableFile();
   },
 
   validateExecutables: async (patch) => {
     try {
-      const report = await window.image2roblox.validateExecutables(patch);
+      const report = await getDesktopApi().validateExecutables(patch);
       set({ executableReport: report });
     } catch (error) {
       set({ error: toErrorMessage(error) });
     }
   }
 }));
+

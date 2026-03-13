@@ -1,4 +1,5 @@
 import { app, BrowserWindow } from "electron";
+import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { DesktopBackend } from "./backend";
@@ -9,6 +10,21 @@ const __dirname = path.dirname(__filename);
 
 let backend: DesktopBackend | null = null;
 
+function resolvePreloadPath(): string {
+  const candidates = [
+    path.join(__dirname, "../preload/index.mjs"),
+    path.join(__dirname, "../preload/index.js")
+  ];
+
+  const existing = candidates.find((candidate) => fs.existsSync(candidate));
+  if (!existing) {
+    console.error("[Image2Roblox] Preload bundle not found.", { candidates });
+    return candidates[0];
+  }
+
+  return existing;
+}
+
 function createWindow(): BrowserWindow {
   const window = new BrowserWindow({
     width: 1460,
@@ -17,7 +33,7 @@ function createWindow(): BrowserWindow {
     minHeight: 760,
     autoHideMenuBar: true,
     webPreferences: {
-      preload: path.join(__dirname, "../preload/index.mjs"),
+      preload: resolvePreloadPath(),
       nodeIntegration: false,
       contextIsolation: true
     }
@@ -55,4 +71,3 @@ app.on("before-quit", () => {
   backend?.dispose();
   backend = null;
 });
-
