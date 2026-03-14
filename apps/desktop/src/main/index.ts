@@ -10,10 +10,14 @@ const __dirname = path.dirname(__filename);
 
 let backend: DesktopBackend | null = null;
 
+function startupLogPath(): string {
+  return path.join(app.getPath("userData"), "startup.log");
+}
+
 function appendStartupLog(event: string, details?: Record<string, unknown>): void {
   try {
-    const logDir = app.getPath("userData");
-    const logPath = path.join(logDir, "startup.log");
+    const logPath = startupLogPath();
+    const logDir = path.dirname(logPath);
     const timestamp = new Date().toISOString();
     const payload = details ? ` ${JSON.stringify(details)}` : "";
     fs.mkdirSync(logDir, { recursive: true });
@@ -92,7 +96,10 @@ function createWindow(): BrowserWindow {
   window.webContents.on("preload-error", (_event, pathFromEvent, error) => {
     const message = error instanceof Error ? error.stack ?? error.message : String(error);
     appendStartupLog("preload:error", { preloadPath: pathFromEvent, message });
-    dialog.showErrorBox("Image2Roblox preload failed", `Preload path: ${pathFromEvent}\n\n${message}`);
+    dialog.showErrorBox(
+      "Image2Roblox preload failed",
+      `Preload path: ${pathFromEvent}\nStartup log: ${startupLogPath()}\n\n${message}`
+    );
   });
 
   window.webContents.on("did-fail-load", (_event, errorCode, errorDescription, validatedURL) => {
@@ -104,7 +111,7 @@ function createWindow(): BrowserWindow {
       const bridgeType = await window.webContents.executeJavaScript("typeof window.image2roblox", true);
       appendStartupLog("bridge:check", { bridgeType });
       if (bridgeType === "undefined") {
-        const message = `window.image2roblox is undefined after page load.\n\nPreload path: ${preloadPath}`;
+        const message = `window.image2roblox is undefined after page load.\n\nPreload path: ${preloadPath}\nStartup log: ${startupLogPath()}`;
         appendStartupLog("bridge:missing", { preloadPath });
         dialog.showErrorBox(
           "Image2Roblox desktop bridge missing",
