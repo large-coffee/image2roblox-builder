@@ -12,6 +12,8 @@
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "tsc -p tsconfig.json --noEmit",
+    "rebuild:native": "electron-builder install-app-deps",
+    "prepackage:win": "pnpm run build && pnpm run rebuild:native",
     "package:win": "electron-builder --win nsis"
   },
   "dependencies": {
